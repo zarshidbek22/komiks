@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="uz" data-l="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>AR · Yo‘qolgan ranglar siri — HunarTech 4.0</title>
+<meta name="theme-color" content="#0d1b3d">
+<meta property="og:title" content="AR · Yo‘qolgan ranglar siri — HunarTech 4.0">
+<meta property="og:image" content="cover.jpg">
+<script type="importmap">
+{"imports":{
+ "three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+ "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/",
+ "mindar-image-three":"https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-three.prod.js"
+}}
+</script>
+<style>
+:root{--ink:#0d1b3d;--sun:#f4b400;--pom:#d6336c;--sky:#2f6fd6}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:#000;color:#fff;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow:hidden}
+[data-t]{display:none}
+html[data-l=uz] [data-t=uz],html[data-l=ru] [data-t=ru],html[data-l=en] [data-t=en]{display:inline}
+#ar{position:fixed;inset:0}
+#ar video{object-fit:cover}
+.scr{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:28px 22px calc(28px + env(safe-area-inset-bottom));z-index:10}
+#intro{background:radial-gradient(120% 80% at 50% 0%,#1f3d8a 0%,#0d1b3d 60%,#070f24 100%)}
+#intro .cv{width:46vw;max-width:220px;border-radius:14px;box-shadow:0 0 0 3px var(--sun),0 18px 50px rgba(0,0,0,.6);transform:rotate(-3deg);margin:14px 0 22px}
+#intro .logo{height:40px}
+#intro h1{font-size:26px;line-height:1.15;font-weight:900;letter-spacing:-.3px}
+#intro h1 small{display:block;font-size:13px;font-weight:800;color:var(--sun);letter-spacing:1.5px;margin-top:6px}
+#intro p{max-width:360px;margin:14px auto 0;font-size:15px;line-height:1.45;color:#d7e1ff}
+.btn{margin-top:22px;border:0;border-radius:999px;padding:17px 30px;font-weight:900;font-size:17px;line-height:1;font-family:inherit;color:var(--ink);background:var(--sun);box-shadow:0 8px 24px rgba(244,180,0,.45);display:inline-flex;gap:10px;align-items:center;cursor:pointer}
+.btn:active{transform:scale(.97)}
+.btn[disabled]{opacity:.7}
+.lang{position:absolute;top:calc(14px + env(safe-area-inset-top));right:14px;display:flex;gap:6px}
+.lang button{border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.08);color:#fff;border-radius:999px;padding:6px 11px;font-weight:800;font-size:12px;font-family:inherit}
+html[data-l=uz] .lang [data-s=uz],html[data-l=ru] .lang [data-s=ru],html[data-l=en] .lang [data-s=en]{background:#fff;color:var(--ink)}
+.small{position:absolute;bottom:calc(10px + env(safe-area-inset-bottom));left:0;right:0;font-size:10.5px;color:#8fa2d6;padding:0 16px}
+.small a{color:#cfd9ff}
+#hint{position:fixed;left:0;right:0;bottom:calc(26px + env(safe-area-inset-bottom));display:none;justify-content:center;z-index:5;pointer-events:none}
+#hint div{background:rgba(13,27,61,.82);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);padding:12px 18px;border-radius:16px;font-weight:800;font-size:15px;max-width:88vw;border:1px solid rgba(255,255,255,.18)}
+#frame{position:fixed;left:50%;top:46%;width:62vw;max-width:340px;aspect-ratio:909/1287;transform:translate(-50%,-50%);z-index:4;display:none;pointer-events:none}
+#frame i{position:absolute;width:34px;height:34px;border:4px solid var(--sun);border-radius:6px;animation:pulse 1.6s ease-in-out infinite}
+#frame i:nth-child(1){left:0;top:0;border-right:0;border-bottom:0}
+#frame i:nth-child(2){right:0;top:0;border-left:0;border-bottom:0}
+#frame i:nth-child(3){left:0;bottom:0;border-right:0;border-top:0}
+#frame i:nth-child(4){right:0;bottom:0;border-left:0;border-top:0}
+#frame b{position:absolute;left:4%;right:4%;height:3px;top:0;background:linear-gradient(90deg,transparent,var(--sun),transparent);animation:scan 2.2s linear infinite;border-radius:3px}
+@keyframes pulse{50%{opacity:.45}}
+@keyframes scan{0%{top:2%}50%{top:96%}100%{top:2%}}
+#bar{position:fixed;top:calc(12px + env(safe-area-inset-top));left:12px;right:12px;display:none;justify-content:space-between;z-index:6;gap:8px}
+#bar button,#bar a{border:0;background:rgba(13,27,61,.78);color:#fff;border-radius:999px;padding:10px 14px;font-weight:800;font-size:13px;font-family:inherit;text-decoration:none;display:inline-flex;align-items:center;gap:6px;border:1px solid rgba(255,255,255,.2)}
+#badge{position:fixed;top:calc(64px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:6;background:var(--pom);color:#fff;font-weight:900;font-size:13px;padding:7px 14px;border-radius:999px;display:none;box-shadow:0 6px 18px rgba(214,51,108,.45)}
+#err{display:none;background:#0d1b3d}
+#err p{max-width:340px;line-height:1.5;color:#d7e1ff;margin-top:10px}
+#load{display:none;background:rgba(7,15,36,.92)}
+#load .ring{width:58px;height:58px;border-radius:50%;border:5px solid rgba(255,255,255,.15);border-top-color:var(--sun);animation:spin 1s linear infinite;margin-bottom:16px}
+#load .pc{font-weight:900;font-size:22px;margin-top:6px;color:var(--sun)}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div id="ar"></div>
+
+<section class="scr" id="intro">
+  <div class="lang"><button data-s="uz">UZ</button><button data-s="ru">RU</button><button data-s="en">EN</button></div>
+  <img class="logo" src="logo.png" alt="Kelajak">
+  <img class="cv" src="cover.jpg" alt="">
+  <h1><span data-t="uz">Yo‘qolgan ranglar siri</span><span data-t="ru">Тайна пропавших красок</span><span data-t="en">The Mystery of the Lost Colors</span><small>HUNARTECH 4.0 · AR</small></h1>
+  <p><span data-t="uz">Kamerani komiksning istalgan sahifasiga qarating — qahramonlar jonlanadi va gapira boshlaydi!</span><span data-t="ru">Наведите камеру на любую страницу комикса — герои оживут и заговорят!</span><span data-t="en">Point your camera at any page of the comic — the heroes come alive and start talking!</span></p>
+  <button class="btn" id="go">📷 <span data-t="uz">Kamerani yoqish</span><span data-t="ru">Включить камеру</span><span data-t="en">Start camera</span></button>
+  <div class="small">© 2026 Ubaydullayev Zarshid Jamshid o‘g‘li · <span data-t="uz">Barcha huquqlar himoyalangan va patentlangan</span><span data-t="ru">Все права защищены и запатентованы</span><span data-t="en">All rights reserved and patented</span> · <a href="index.html">zarshidbek22.github.io/komiks</a></div>
+</section>
+
+<section class="scr" id="load"><div class="ring"></div>
+  <b><span data-t="uz">AR yuklanmoqda…</span><span data-t="ru">Загружаем AR…</span><span data-t="en">Loading AR…</span></b>
+  <div class="pc" id="pc">0%</div>
+</section>
+
+<section class="scr" id="err">
+  <h1 style="font-size:22px"><span data-t="uz">Kamera ochilmadi</span><span data-t="ru">Камера не открылась</span><span data-t="en">Camera could not start</span></h1>
+  <p><span data-t="uz">Brauzerga kameraga ruxsat bering va sahifani yangilang. Yoki videolarni oddiy rejimda ko‘ring.</span><span data-t="ru">Разрешите браузеру доступ к камере и обновите страницу. Или посмотрите видео в обычном режиме.</span><span data-t="en">Allow camera access in your browser and reload. Or watch the videos in normal mode.</span></p>
+  <a class="btn" href="index.html" style="text-decoration:none">▶ <span data-t="uz">Videolar</span><span data-t="ru">Видео</span><span data-t="en">Videos</span></a>
+</section>
+
+<div id="frame"><i></i><i></i><i></i><i></i><b></b></div>
+<div id="hint"><div><span data-t="uz">Sahifani ramkaga to‘liq sig‘diring</span><span data-t="ru">Поместите страницу целиком в рамку</span><span data-t="en">Fit the whole page inside the frame</span></div></div>
+<div id="bar"><button id="snd">🔊</button><a id="full" href="index.html">▶ <span data-t="uz">To‘liq ekran</span><span data-t="ru">На весь экран</span><span data-t="en">Full screen</span></a></div>
+<div id="badge"></div>
+
+<script type="module">
+import * as THREE from 'three';
+import { MindARThree } from 'mindar-image-three';
+
+const H = document.documentElement, $ = s => document.querySelector(s);
+const LANGS = ['uz','ru','en'];
+let L = (location.hash.slice(1) || new URLSearchParams(location.search).get('l') || 'uz').toLowerCase();
+if (!LANGS.includes(L)) L = 'uz';
+const setL = l => { L = l; H.dataset.l = l; H.lang = l; history.replaceState(null,'','#'+l); };
+setL(L);
+document.querySelectorAll('.lang button').forEach(b => b.onclick = () => setL(b.dataset.s));
+
+const NAMES = {
+  uz: ['Muqova','1-sahifa','2-sahifa','3-sahifa','4-sahifa','5-sahifa','6-sahifa','7-sahifa','8-sahifa'],
+  ru: ['Обложка','Стр. 1','Стр. 2','Стр. 3','Стр. 4','Стр. 5','Стр. 6','Стр. 7','Стр. 8'],
+  en: ['Cover','Page 1','Page 2','Page 3','Page 4','Page 5','Page 6','Page 7','Page 8']
+};
+// target index -> video (cover plays the opening scene)
+const VID = i => 'v-p' + Math.max(1, i) + '.mp4';
+const PAGE_AR = 1287 / 909;        // page height / width
+const VID_AR = 960 / 540;          // video height / width
+
+async function loadTargets(url) {
+  const r = await fetch(url);
+  if (!r.ok) throw new Error('targets ' + r.status);
+  const total = +r.headers.get('content-length') || 3.1e6;
+  const rd = r.body.getReader(); const parts = []; let got = 0;
+  for (;;) { const { done, value } = await rd.read(); if (done) break; parts.push(value); got += value.length;
+    $('#pc').textContent = Math.min(99, Math.round(got / total * 100)) + '%'; }
+  let b = new Uint8Array(got), o = 0; for (const p of parts) { b.set(p, o); o += p.length; }
+  if (b[0] === 0x1f && b[1] === 0x8b) {
+    if ('DecompressionStream' in window) {
+      const s = new Blob([b]).stream().pipeThrough(new DecompressionStream('gzip'));
+      b = new Uint8Array(await new Response(s).arrayBuffer());
+    } else {
+      const pako = await import('https://cdn.jsdelivr.net/npm/pako@2.1.0/+esm');
+      b = pako.ungzip(b);
+    }
+  }
+  return URL.createObjectURL(new Blob([b]));
+}
+
+// one shared video element: unlocked once by the user's tap, so sound works on iPhone too
+const video = document.createElement('video');
+video.setAttribute('playsinline', ''); video.setAttribute('webkit-playsinline', '');
+video.crossOrigin = 'anonymous'; video.preload = 'auto'; video.loop = true;
+let muted = false;
+const sndBtn = $('#snd');
+const paintSnd = () => sndBtn.textContent = muted ? '🔇' : '🔊';
+sndBtn.onclick = () => { muted = !muted; video.muted = muted; paintSnd(); if (video.paused && current >= 0) video.play().catch(()=>{}); };
+
+let current = -1, mind = null;
+
+$('#go').onclick = async () => {
+  $('#go').disabled = true;
+  // unlock audio inside the user gesture
+  video.src = VID(1); video.muted = false;
+  video.play().then(() => video.pause()).catch(() => { muted = true; video.muted = true; paintSnd(); });
+  $('#intro').style.display = 'none'; $('#load').style.display = 'flex';
+  try {
+    const src = await loadTargets('t-' + L + '.bin');
+    mind = new MindARThree({
+      container: $('#ar'), imageTargetSrc: src, maxTrack: 1,
+      uiLoading: 'no', uiScanning: 'no', uiError: 'no',
+      filterMinCF: 0.0001, filterBeta: 0.001, warmupTolerance: 3, missTolerance: 6
+    });
+    const { renderer, scene, camera } = mind;
+    
+    const tex = new THREE.VideoTexture(video); tex.colorSpace = THREE.SRGBColorSpace;
+    const h = PAGE_AR * 0.97, w = h / VID_AR;
+    const group = new THREE.Group();
+    const glow = new THREE.Mesh(new THREE.PlaneGeometry(w + 0.06, h + 0.06), new THREE.MeshBasicMaterial({ color: 0xf4b400, transparent: true, opacity: 0.95 }));
+    glow.position.z = 0.004;
+    const screen = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ map: tex }));
+    screen.position.z = 0.008;
+    group.add(glow, screen); group.scale.setScalar(0.001);
+    let pop = 0;
+
+    for (let i = 0; i < 9; i++) {
+      const a = mind.addAnchor(i);
+      a.onTargetFound = () => {
+        console.log('AR found', i);
+        current = i; a.group.add(group); pop = 0;
+        const want = VID(i);
+        if (!video.src.endsWith(want)) { video.src = want; video.currentTime = 0; }
+        video.muted = muted;
+        video.play().catch(() => { muted = true; video.muted = true; paintSnd(); video.play().catch(()=>{}); });
+        $('#frame').style.display = 'none'; $('#hint').style.display = 'none';
+        $('#bar').style.display = 'flex';
+        $('#full').href = 'index.html#p' + Math.max(1, i);
+        const bd = $('#badge'); bd.textContent = '✨ ' + NAMES[L][i]; bd.style.display = 'block';
+      };
+      a.onTargetLost = () => {
+        if (current !== i) return;
+        current = -1; video.pause();
+        $('#frame').style.display = 'block'; $('#hint').style.display = 'flex'; $('#badge').style.display = 'none';
+      };
+    }
+
+    await mind.start();
+    $('#load').style.display = 'none';
+    $('#frame').style.display = 'block'; $('#hint').style.display = 'flex';
+    $('#bar').style.display = 'flex'; paintSnd();
+    window.__arReady = true;
+
+    renderer.setAnimationLoop(() => {
+      if (current >= 0 && pop < 1) { pop = Math.min(1, pop + 0.07); const e = 1 - Math.pow(1 - pop, 3); group.scale.setScalar(0.001 + e * 0.999); }
+      renderer.render(scene, camera);
+    });
+  } catch (e) {
+    console.error('AR error', e);
+    $('#load').style.display = 'none'; $('#err').style.display = 'flex';
+  }
+};
+</script>
+</body>
+</html>
